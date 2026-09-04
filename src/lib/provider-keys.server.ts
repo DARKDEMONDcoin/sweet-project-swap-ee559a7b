@@ -4,7 +4,7 @@
  */
 import { getSecrets, resetSecretsCache } from "./secrets.server";
 
-type Keys = { gemini: string; openrouter: string };
+type Keys = { lovable: string; gemini: string; openrouter: string };
 
 /** إبطال الذاكرة المؤقتة بعد تحديث المفاتيح من الإعدادات. */
 export function resetProviderKeys(): void {
@@ -12,8 +12,9 @@ export function resetProviderKeys(): void {
 }
 
 export async function providerKeys(): Promise<Keys> {
-  const found = await getSecrets(["GEMINI_API_KEY", "GOOGLE_API_KEY", "OPENROUTER_API_KEY"] as const);
+  const found = await getSecrets(["LOVABLE_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "OPENROUTER_API_KEY"] as const);
   return {
+    lovable: found.LOVABLE_API_KEY,
     gemini: found.GEMINI_API_KEY || found.GOOGLE_API_KEY,
     openrouter: found.OPENROUTER_API_KEY,
   };
