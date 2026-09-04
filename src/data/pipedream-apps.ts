@@ -84,8 +84,24 @@ export const pipedreamApps: PipedreamApp[] = [
     publishComponent: "youtube_data_api-upload-video",
     accountProp: "youtubeDataApi",
   },
-  { provider: "threads", slug: "threads", label: "ثريدز" },
-  { provider: "pinterest", slug: "pinterest", label: "بينترست" },
+  {
+    provider: "threads",
+    slug: "threads",
+    label: "ثريدز",
+    publishComponent: "threads-post-thread",
+    accountProp: "threads",
+    actions: {
+      post: { component: "threads-post-thread", accountProp: "threads", label: "نشر منشور" },
+    },
+  },
+  {
+    provider: "pinterest",
+    slug: "pinterest",
+    label: "بينترست",
+    actions: {
+      createPin: { component: "pinterest-create-pin", accountProp: "pinterest", label: "إنشاء بِن" },
+    },
+  },
   {
     provider: "gmail",
     slug: "gmail",
@@ -128,14 +144,51 @@ export const pipedreamApps: PipedreamApp[] = [
     slug: "google_search_console",
     label: "Google Search Console",
     note: "تقرأ نور المواقع والكلمات والنقرات عبر ربط Google الرسمي.",
+    actions: {
+      performance: {
+        component: "google_search_console-retrieve-site-performance-data",
+        accountProp: "googleSearchConsole",
+        label: "تقرير أداء البحث",
+      },
+      indexUrl: {
+        component: "google_search_console-submit-url-for-indexing",
+        accountProp: "googleSearchConsole",
+        label: "طلب فهرسة رابط",
+      },
+    },
   },
   {
     provider: "analytics",
     slug: "google_analytics",
     label: "Google Analytics 4",
     note: "يقرأ آدم خصائص GA4 والجلسات والتحويلات عبر ربط Google الرسمي.",
+    actions: {
+      runReport: {
+        component: "google_analytics-run-report-in-ga4",
+        accountProp: "analytics",
+        label: "تقرير GA4",
+      },
+    },
   },
-  { provider: "whatsapp", slug: "whatsapp_business", label: "واتساب للأعمال" },
+  {
+    provider: "whatsapp",
+    slug: "whatsapp_business",
+    label: "واتساب للأعمال",
+    publishComponent: "whatsapp_business-send-text-message",
+    accountProp: "whatsapp",
+    actions: {
+      sendText: {
+        component: "whatsapp_business-send-text-message",
+        accountProp: "whatsapp",
+        label: "إرسال رسالة واتساب",
+      },
+      sendTemplate: {
+        component: "whatsapp_business-send-text-using-template",
+        accountProp: "whatsapp",
+        label: "إرسال رسالة بقالب معتمد",
+      },
+    },
+  },
   {
     provider: "hubspot",
     slug: "hubspot",
@@ -175,7 +228,23 @@ export const pipedreamApps: PipedreamApp[] = [
       },
     },
   },
-  { provider: "drive", slug: "google_drive", label: "جوجل درايف" },
+  {
+    provider: "drive",
+    slug: "google_drive",
+    label: "جوجل درايف",
+    actions: {
+      createTextFile: {
+        component: "google_drive-create-file-from-text",
+        accountProp: "googleDrive",
+        label: "إنشاء ملف نصي",
+      },
+      searchFiles: {
+        component: "google_drive-search-files",
+        accountProp: "googleDrive",
+        label: "بحث في الملفات",
+      },
+    },
+  },
   {
     provider: "slack",
     slug: "slack",
@@ -218,7 +287,20 @@ export const pipedreamApps: PipedreamApp[] = [
       },
     },
   },
-  { provider: "stripe", slug: "stripe", label: "سترايب" },
+  {
+    provider: "stripe",
+    slug: "stripe",
+    label: "سترايب",
+    actions: {
+      createCustomer: { component: "stripe-create-customer", accountProp: "app", label: "إضافة عميل" },
+      createInvoice: { component: "stripe-create-invoice", accountProp: "app", label: "إنشاء فاتورة" },
+      createPayment: {
+        component: "stripe-create-payment-intent",
+        accountProp: "app",
+        label: "إنشاء طلب دفع",
+      },
+    },
+  },
   {
     provider: "telegram",
     slug: "telegram_bot_api",
@@ -233,9 +315,35 @@ export const pipedreamApps: PipedreamApp[] = [
       },
     },
   },
-  { provider: "figma", slug: "figma", label: "فيجما" },
-  { provider: "canva", slug: "canva", label: "كانفا" },
-  { provider: "meta-ads", slug: "facebook_graph_api", label: "إعلانات ميتا" },
+  {
+    provider: "figma",
+    slug: "figma",
+    label: "فيجما",
+    actions: {
+      comment: { component: "figma-post-a-comment", accountProp: "figmaApp", label: "تعليق على تصميم" },
+      listComments: {
+        component: "figma-list-comments",
+        accountProp: "figmaApp",
+        label: "قراءة التعليقات",
+      },
+    },
+  },
+  {
+    provider: "canva",
+    slug: "canva",
+    label: "كانفا",
+    actions: {
+      createDesign: { component: "canva-create-design", accountProp: "canva", label: "إنشاء تصميم" },
+      listDesigns: { component: "canva-list-designs", accountProp: "canva", label: "عرض التصاميم" },
+      exportDesign: { component: "canva-export-design", accountProp: "canva", label: "تصدير تصميم" },
+    },
+  },
+  {
+    provider: "meta-ads",
+    slug: "facebook_graph_api",
+    label: "إعلانات ميتا",
+    note: "لا يوفّر Pipedream إجراءات جاهزة لإعلانات ميتا؛ يقرأ آدم الأداء مباشرة عبر وكيل Pipedream بحساب المستخدم.",
+  },
   {
     provider: "google-ads",
     slug: "google_ads",
@@ -355,7 +463,30 @@ export const pipedreamApps: PipedreamApp[] = [
       sendSms: { component: "twilio-send-message", accountProp: "twilio", label: "إرسال SMS" },
     },
   },
-  { provider: "google-business", slug: "google_my_business", label: "نشاطي على جوجل" },
+  {
+    provider: "google-business",
+    slug: "google_my_business",
+    label: "نشاطي على جوجل",
+    publishComponent: "google_my_business-create-post",
+    accountProp: "app",
+    actions: {
+      createPost: {
+        component: "google_my_business-create-post",
+        accountProp: "app",
+        label: "نشر تحديث على النشاط",
+      },
+      listReviews: {
+        component: "google_my_business-list-all-reviews",
+        accountProp: "app",
+        label: "قراءة التقييمات",
+      },
+      replyReview: {
+        component: "google_my_business-create-update-reply-to-review",
+        accountProp: "app",
+        label: "الرد على تقييم",
+      },
+    },
+  },
 ];
 
 const byProvider = new Map(pipedreamApps.map((a) => [a.provider, a]));

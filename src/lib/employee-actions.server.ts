@@ -89,7 +89,12 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "subject", label: "الموضوع", required: true },
       { name: "body", label: "النص", required: true },
     ],
-    toProps: (v) => ({ toRecipients: [v["to"]], subject: v["subject"], content: v["body"] }),
+    toProps: (v) => ({
+      recipients: [v["to"]],
+      subject: v["subject"],
+      content: v["body"],
+      contentType: "Text",
+    }),
   },
   {
     id: "eva-create-event",
@@ -144,14 +149,18 @@ export const employeeActions: EmployeeActionDef[] = [
     label: "إنشاء صفقة في هابسبوت",
     inputs: [
       { name: "dealname", label: "اسم الصفقة", required: true },
+      { name: "pipeline", label: "خط البيع", required: true },
+      { name: "dealstage", label: "المرحلة", required: true },
       { name: "amount", label: "القيمة" },
-      { name: "dealstage", label: "المرحلة" },
+      { name: "closedate", label: "تاريخ الإغلاق (YYYY-MM-DD)" },
     ],
     toProps: (v) => ({
-      properties: {
-        dealname: v["dealname"],
-        amount: v["amount"] ?? "",
-        dealstage: v["dealstage"] ?? "",
+      dealname: v["dealname"],
+      pipeline: v["pipeline"],
+      dealstage: v["dealstage"],
+      objectProperties: {
+        ...(v["amount"]?.trim() ? { amount: v["amount"].trim() } : {}),
+        ...(v["closedate"]?.trim() ? { closedate: v["closedate"].trim() } : {}),
       },
     }),
   },
@@ -163,13 +172,16 @@ export const employeeActions: EmployeeActionDef[] = [
     label: "تسجيل صف في جوجل شيتس",
     inputs: [
       { name: "sheetId", label: "معرّف الملف", required: true },
-      { name: "sheetName", label: "اسم الورقة", required: true },
+      { name: "worksheetId", label: "معرّف الورقة (رقم gid)", required: true },
       { name: "row", label: "القيم مفصولة بفاصلة", required: true },
     ],
     toProps: (v) => ({
       sheetId: v["sheetId"],
-      sheetName: v["sheetName"],
-      cells: (v["row"] ?? "").split(",").map((s) => s.trim()),
+      worksheetId: Number(v["worksheetId"]) || 0,
+      myColumnData: (v["row"] ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
     }),
   },
   {
@@ -180,13 +192,16 @@ export const employeeActions: EmployeeActionDef[] = [
     label: "تسجيل نتيجة قياس في شيتس",
     inputs: [
       { name: "sheetId", label: "معرّف الملف", required: true },
-      { name: "sheetName", label: "اسم الورقة", required: true },
+      { name: "worksheetId", label: "معرّف الورقة (رقم gid)", required: true },
       { name: "row", label: "القيم مفصولة بفاصلة", required: true },
     ],
     toProps: (v) => ({
       sheetId: v["sheetId"],
-      sheetName: v["sheetName"],
-      cells: (v["row"] ?? "").split(",").map((s) => s.trim()),
+      worksheetId: Number(v["worksheetId"]) || 0,
+      myColumnData: (v["row"] ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
     }),
   },
   {
@@ -199,7 +214,12 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "channel", label: "القناة", required: true },
       { name: "text", label: "النص", required: true },
     ],
-    toProps: (v) => ({ conversation: v["channel"], text: v["text"] }),
+    toProps: (v) => ({
+      channelType: "PUBLIC",
+      conversation: v["channel"],
+      text: v["text"],
+      mrkdwn: true,
+    }),
   },
 
   /* ————— السوشيال: تعليقات ورسائل الصفحات ————— */
@@ -294,8 +314,8 @@ export const employeeActions: EmployeeActionDef[] = [
     toProps: (v) => ({
       LastName: v["LastName"],
       Company: v["Company"],
-      Email: v["Email"] ?? "",
-      Phone: v["Phone"] ?? "",
+      ...(v["Email"]?.trim() ? { Email: v["Email"].trim() } : {}),
+      ...(v["Phone"]?.trim() ? { Phone: v["Phone"].trim() } : {}),
     }),
   },
   {
@@ -329,9 +349,9 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "content", label: "المحتوى" },
     ],
     toProps: (v) => ({
-      parent: { page_id: v["parentId"] },
+      parent: v["parentId"],
       title: v["title"],
-      pageContent: v["content"] ?? "",
+      ...(v["content"]?.trim() ? { content: v["content"].trim() } : {}),
     }),
   },
 
@@ -651,6 +671,203 @@ export const employeeActions: EmployeeActionDef[] = [
     inputs: [],
     run: ({ config, workspaceId, accountId }) =>
       metaAdsSummary(config, workspaceId, accountId).then((report) => ({ report })),
+  },
+
+  /* ————— سيو وقياس: نور وآدم ————— */
+  {
+    id: "nour-gsc-performance",
+    employeeId: "nour",
+    provider: "search-console",
+    action: "performance",
+    label: "تقرير أداء البحث (كلمات ونقرات)",
+    inputs: [
+      { name: "siteUrl", label: "الموقع في Search Console", required: true },
+      { name: "days", label: "عدد الأيام (افتراضي ٢٨)" },
+    ],
+    toProps: (v) => {
+      const days = Math.max(1, Math.min(180, Number(v["days"] ?? 28) || 28));
+      const end = new Date();
+      const start = new Date(end.getTime() - days * 86_400_000);
+      return {
+        siteUrl: v["siteUrl"],
+        startDate: start.toISOString().slice(0, 10),
+        endDate: end.toISOString().slice(0, 10),
+        dimensions: ["query"],
+        rowLimit: 25,
+      };
+    },
+  },
+  {
+    id: "nour-gsc-index",
+    employeeId: "nour",
+    provider: "search-console",
+    action: "indexUrl",
+    label: "طلب فهرسة رابط من جوجل",
+    inputs: [{ name: "siteUrl", label: "الرابط المطلوب فهرسته", required: true }],
+    toProps: (v) => ({ siteUrl: v["siteUrl"], notificationType: "URL_UPDATED" }),
+  },
+  {
+    id: "adam-ga4-report",
+    employeeId: "adam",
+    provider: "analytics",
+    action: "runReport",
+    label: "تقرير GA4 (جلسات وتحويلات)",
+    inputs: [
+      { name: "property", label: "معرّف خاصية GA4", required: true },
+      { name: "days", label: "عدد الأيام (افتراضي ٢٨)" },
+    ],
+    toProps: (v) => {
+      const days = Math.max(1, Math.min(365, Number(v["days"] ?? 28) || 28));
+      return {
+        property: v["property"],
+        startDate: `${days}daysAgo`,
+        endDate: "today",
+        metrics: ["sessions", "totalUsers", "conversions"],
+        dimensions: ["sessionDefaultChannelGroup"],
+      };
+    },
+  },
+
+  /* ————— تصميم: دانة ————— */
+  {
+    id: "dana-canva-design",
+    employeeId: "dana",
+    provider: "canva",
+    action: "createDesign",
+    label: "إنشاء تصميم في كانفا",
+    inputs: [
+      { name: "designType", label: "نوع التصميم (مثل presentation)", required: true },
+      { name: "title", label: "اسم التصميم" },
+    ],
+    toProps: (v) => ({
+      designType: v["designType"],
+      ...(v["title"]?.trim() ? { title: v["title"].trim() } : {}),
+    }),
+  },
+  {
+    id: "dana-figma-comment",
+    employeeId: "dana",
+    provider: "figma",
+    action: "comment",
+    label: "تعليق على ملف فيجما",
+    inputs: [
+      { name: "projectId", label: "معرّف المشروع", required: true },
+      { name: "fileId", label: "معرّف الملف", required: true },
+      { name: "message", label: "نص التعليق", required: true },
+    ],
+    toProps: (v) => ({ projectId: v["projectId"], fileId: v["fileId"], message: v["message"] }),
+  },
+  {
+    id: "dana-drive-text-file",
+    employeeId: "dana",
+    provider: "drive",
+    action: "createTextFile",
+    label: "إنشاء ملف نصي في درايف",
+    inputs: [
+      { name: "name", label: "اسم الملف", required: true },
+      { name: "content", label: "المحتوى", required: true },
+      { name: "parentId", label: "معرّف المجلد (اختياري)" },
+    ],
+    toProps: (v) => ({
+      name: v["name"],
+      content: v["content"],
+      mimeType: "text/plain",
+      ...(v["parentId"]?.trim() ? { parentId: v["parentId"].trim() } : {}),
+    }),
+  },
+
+  /* ————— مبيعات وفواتير: سام على سترايب ————— */
+  {
+    id: "sam-stripe-customer",
+    employeeId: "sam",
+    provider: "stripe",
+    action: "createCustomer",
+    label: "إضافة عميل في سترايب",
+    inputs: [
+      { name: "name", label: "الاسم", required: true },
+      { name: "email", label: "البريد" },
+      { name: "phone", label: "الجوال" },
+    ],
+    toProps: (v) => ({
+      name: v["name"],
+      ...(v["email"]?.trim() ? { email: v["email"].trim() } : {}),
+      ...(v["phone"]?.trim() ? { phone: v["phone"].trim() } : {}),
+    }),
+  },
+  {
+    id: "sam-stripe-invoice",
+    employeeId: "sam",
+    provider: "stripe",
+    action: "createInvoice",
+    label: "إنشاء فاتورة سترايب",
+    inputs: [
+      { name: "customer", label: "معرّف العميل (cus_…)", required: true },
+      { name: "description", label: "وصف الفاتورة" },
+      { name: "daysUntilDue", label: "أيام الاستحقاق (افتراضي ٧)" },
+    ],
+    toProps: (v) => ({
+      customer: v["customer"],
+      collectionMethod: "send_invoice",
+      daysUntilDue: Math.max(1, Number(v["daysUntilDue"] ?? 7) || 7),
+      ...(v["description"]?.trim() ? { description: v["description"].trim() } : {}),
+    }),
+  },
+  {
+    id: "sam-stripe-payment",
+    employeeId: "sam",
+    provider: "stripe",
+    action: "createPayment",
+    label: "إنشاء طلب دفع سترايب",
+    inputs: [
+      { name: "amount", label: "المبلغ بأصغر وحدة (هللة/سنت)", required: true },
+      { name: "currency", label: "العملة (مثل sar)", required: true },
+      { name: "country", label: "الدولة (مثل SA)", required: true },
+    ],
+    toProps: (v) => ({
+      amount: Math.max(1, Number(v["amount"]) || 1),
+      currency: (v["currency"] ?? "sar").toLowerCase(),
+      country: (v["country"] ?? "SA").toUpperCase(),
+    }),
+  },
+
+  /* ————— نشاطي على جوجل: سِراج ————— */
+  {
+    id: "sonny-gbp-post",
+    employeeId: "sonny",
+    provider: "google-business",
+    action: "createPost",
+    label: "نشر تحديث على نشاطي على جوجل",
+    inputs: [
+      { name: "account", label: "معرّف الحساب", required: true },
+      { name: "location", label: "معرّف الفرع", required: true },
+      { name: "summary", label: "نص التحديث", required: true },
+    ],
+    toProps: (v) => ({
+      account: v["account"],
+      location: v["location"],
+      topicType: "STANDARD",
+      languageCode: "ar",
+      summary: v["summary"],
+    }),
+  },
+  {
+    id: "sonny-gbp-reply",
+    employeeId: "sonny",
+    provider: "google-business",
+    action: "replyReview",
+    label: "الرد على تقييم في نشاطي على جوجل",
+    inputs: [
+      { name: "account", label: "معرّف الحساب", required: true },
+      { name: "location", label: "معرّف الفرع", required: true },
+      { name: "review", label: "معرّف التقييم", required: true },
+      { name: "comment", label: "نص الرد", required: true },
+    ],
+    toProps: (v) => ({
+      account: v["account"],
+      location: v["location"],
+      review: v["review"],
+      comment: v["comment"],
+    }),
   },
 ];
 
