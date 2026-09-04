@@ -2,7 +2,7 @@ import { employeeActions } from "../../src/lib/employee-actions.server";
 import { directActions } from "../../src/lib/direct-actions.server";
 import { pipedreamApps } from "../../src/data/pipedream-apps";
 
-const apps = new Map(pipedreamApps.map((a: any) => [a.id, a]));
+const apps = new Map(pipedreamApps.map((a: any) => [a.provider, a]));
 let bad = 0;
 const byApp = new Map<string, string[]>();
 for (const d of employeeActions as any[]) {
@@ -19,5 +19,5 @@ for (const d of employeeActions as any[]) {
 }
 console.log("\nactions:", employeeActions.length, "problems:", bad);
 console.log("apps with actions:", byApp.size, "/", pipedreamApps.length);
-console.log("APPS WITHOUT ACTIONS:", pipedreamApps.filter((a: any) => !byApp.has(a.id)).map((a: any) => a.id).join(", "));
+console.log("APPS WITHOUT ACTIONS:", pipedreamApps.filter((a: any) => !byApp.has(a.provider)).map((a: any) => a.provider).join(", "));
 for (const [k, v] of [...byApp].sort()) console.log(k.padEnd(20), v.length);
