@@ -300,13 +300,23 @@ export const directActions: Record<string, (ctx: DirectContext) => Promise<unkno
         ...(opt(ctx, "description") ? { description: v(ctx, "description") } : {}),
       },
     }),
-  "sam-stripe-payment": (ctx) =>
-    api(ctx, "https://api.stripe.com/v1/payment_links", {
+  "sam-stripe-payment": async (ctx) => {
+    // رابط الدفع في سترايب يحتاج سعراً قائماً، فننشئ المنتج والسعر أولاً.
+    const price = await api<{ id?: string }>(ctx, "https://api.stripe.com/v1/prices", {
       form: {
-        "line_items[0][price]": v(ctx, "price"),
-        "line_items[0][quantity]": opt(ctx, "quantity") ?? "1",
+        unit_amount: String(Math.max(1, Number(v(ctx, "amount")) || 1)),
+        currency: (v(ctx, "currency") || "sar").toLowerCase(),
+        "product_data[name]": opt(ctx, "description") ?? "طلب دفع",
       },
-    }),
+    });
+    if (!price.id) throw new Error("تعذّر إنشاء السعر في سترايب.");
+    return api(ctx, "https://api.stripe.com/v1/payment_links", {
+      form: {
+        "line_items[0][price]": price.id,
+        "line_items[0][quantity]": "1",
+      },
+    });
+  },
 
   /* شيتس ودرايف */
   "sam-log-sheet": async (ctx) => {
@@ -357,7 +367,7 @@ export const directActions: Record<string, (ctx: DirectContext) => Promise<unkno
   "team-trello-card": (ctx) =>
     api(
       ctx,
-      `https://api.trello.com/1/cards?idList=${encodeURIComponent(v(ctx, "listId"))}&name=${encodeURIComponent(v(ctx, "name"))}${opt(ctx, "desc") ? `&desc=${encodeURIComponent(v(ctx, "desc"))}` : ""}${opt(ctx, "due") ? `&due=${encodeURIComponent(v(ctx, "due"))}` : ""}`,
+      `https://api.trello.com/1/cards?idList=${encodeURIComponent(v(ctx, "idList"))}&name=${encodeURIComponent(v(ctx, "name"))}${opt(ctx, "desc") ? `&desc=${encodeURIComponent(v(ctx, "desc"))}` : ""}${opt(ctx, "due") ? `&due=${encodeURIComponent(v(ctx, "due"))}` : ""}`,
       { method: "POST", text: "" },
     ),
   "team-asana-task": (ctx) =>
@@ -365,9 +375,10 @@ export const directActions: Record<string, (ctx: DirectContext) => Promise<unkno
       json: {
         data: {
           name: v(ctx, "name"),
-          projects: [v(ctx, "projectId")],
+          projects: [v(ctx, "project")],
+          ...(opt(ctx, "workspace") ? { workspace: v(ctx, "workspace") } : {}),
           ...(opt(ctx, "notes") ? { notes: v(ctx, "notes") } : {}),
-          ...(opt(ctx, "dueOn") ? { due_on: v(ctx, "dueOn") } : {}),
+          ...(opt(ctx, "due_on") ? { due_on: v(ctx, "due_on") } : {}),
         },
       },
     }),
@@ -435,6 +446,12 @@ export const directActions: Record<string, (ctx: DirectContext) => Promise<unkno
       `https://mybusiness.googleapis.com/v4/accounts/${encodeURIComponent(v(ctx, "account"))}/locations/${encodeURIComponent(v(ctx, "location"))}/reviews/${encodeURIComponent(v(ctx, "review"))}/reply`,
       { method: "PUT", json: { comment: v(ctx, "comment") } },
     ),
+
+  /* تيليجرام: الوكيل يعوّض توكن البوت في الرابط. */
+  "team-telegram-send": (ctx) =>
+    api(ctx, "https://api.telegram.org/bot{{$auth.token}}/sendMessage", {
+      json: { chat_id: v(ctx, "chatId"), text: v(ctx, "text") },
+    }),
 
   /* سيو وقياس */
   "nour-gsc-performance": (ctx) => {
