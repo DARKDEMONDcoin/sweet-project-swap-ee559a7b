@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 /** حساب التجربة المشترك — لا تسجيل ولا كلمات مرور من المستخدم. */
-const GUEST_EMAIL = "guest@sahl.app";
+export const GUEST_EMAIL = "guest@sahl.app";
 
 /**
  * يهيّئ حساب التجربة (يُنشئه مرة واحدة مع مساحة عمله عبر trigger)

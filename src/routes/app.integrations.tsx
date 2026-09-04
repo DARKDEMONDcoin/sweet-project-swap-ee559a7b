@@ -24,6 +24,8 @@ import {
   startPipedreamConnect,
   syncPipedreamAccounts,
 } from "@/lib/pipedream.functions";
+import { GUEST_EMAIL } from "@/lib/guest.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/integrations")({
@@ -64,6 +66,7 @@ function IntegrationsPage() {
   const syncAccounts = useServerFn(syncPipedreamAccounts);
   const disconnectPd = useServerFn(disconnectPipedream);
   const checkPipedream = useServerFn(pipedreamStatus);
+  const [isGuest, setIsGuest] = useState(false);
   const [pdReady, setPdReady] = useState<boolean | null>(null);
   const [pdEnv, setPdEnv] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -76,6 +79,13 @@ function IntegrationsPage() {
   const [ghostOpen, setGhostOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingSync, setPendingSync] = useState(false);
+
+  useEffect(() => {
+    void supabase.auth
+      .getUser()
+      .then(({ data }) => setIsGuest(data.user?.email === GUEST_EMAIL))
+      .catch(() => setIsGuest(false));
+  }, []);
 
   useEffect(() => {
     void checkPipedream({ data: undefined })
@@ -128,6 +138,12 @@ function IntegrationsPage() {
 
   const toggle = async (id: string, status: string, provider: string) => {
     setError(null);
+    if (isGuest) {
+      setError(
+        "أنت في وضع التجربة (بدون تسجيل) — مساحة التجربة مشتركة، فلا يمكن ربط حساباتك الحقيقية بها. سجّل دخولك بحسابك ثم اربط منصاتك.",
+      );
+      return;
+    }
     if (realProviders.has(provider)) {
       if (status !== "connected") {
         if (provider === "wordpress") {
@@ -242,6 +258,22 @@ function IntegrationsPage() {
         <p className="mb-6 rounded-2xl bg-coral/12 px-4 py-3 text-sm font-semibold text-coral">
           {error}
         </p>
+      ) : null}
+
+      {isGuest ? (
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-amber/40 bg-amber/10 p-4">
+          <ShieldCheck className="size-5 shrink-0 text-coral" />
+          <p className="flex-1 text-sm font-semibold">
+            أنت تتصفح في وضع التجربة بدون تسجيل، ومساحة التجربة مشتركة بين الزوار — سجّل دخولك
+            بحسابك أولاً ليُحفظ الربط في مساحتك أنت.
+          </p>
+          <a
+            href="/auth"
+            className="shrink-0 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-bold text-background"
+          >
+            سجّل الدخول
+          </a>
+        </div>
       ) : null}
 
       <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-secondary/50 p-4">

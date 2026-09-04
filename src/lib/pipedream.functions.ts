@@ -46,6 +46,12 @@ export const startPipedreamConnect = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
+    // مساحة التجربة مشتركة بين الزوار — يُمنع ربط حسابات حقيقية بها.
+    if (typeof context.claims?.email === "string" && context.claims.email === "guest@sahl.app") {
+      throw new Error(
+        "أنت في وضع التجربة — سجّل دخولك بحسابك ثم اربط منصاتك ليُحفظ الربط في مساحتك.",
+      );
+    }
     await assertOwner(context.supabase, data.workspaceId);
     const app = pipedreamApp(data.provider);
     if (!app) throw new Error("هذه المنصة لا تُدار عبر Pipedream.");
