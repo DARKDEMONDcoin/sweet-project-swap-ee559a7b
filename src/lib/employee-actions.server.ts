@@ -441,6 +441,7 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "title", label: "اسم الصفقة", required: true },
       { name: "value", label: "القيمة" },
       { name: "currency", label: "العملة" },
+      { name: "personId", label: "معرّف جهة الاتصال (اختياري)" },
     ],
     toProps: (v) => ({
       title: v["title"],
@@ -472,7 +473,7 @@ export const employeeActions: EmployeeActionDef[] = [
     action: "createCard",
     label: "إنشاء كرت في تريلو",
     inputs: [
-      { name: "board", label: "معرّف اللوحة", required: true },
+      { name: "board", label: "معرّف اللوحة (اختياري)" },
       { name: "idList", label: "معرّف القائمة", required: true },
       { name: "name", label: "عنوان الكرت", required: true },
       { name: "desc", label: "الوصف" },
@@ -493,7 +494,7 @@ export const employeeActions: EmployeeActionDef[] = [
     action: "createTask",
     label: "إنشاء مهمة في أسانا",
     inputs: [
-      { name: "workspace", label: "معرّف المساحة", required: true },
+      { name: "workspace", label: "معرّف المساحة (اختياري)" },
       { name: "project", label: "معرّف المشروع", required: true },
       { name: "name", label: "عنوان المهمة", required: true },
       { name: "notes", label: "التفاصيل" },
@@ -533,8 +534,8 @@ export const employeeActions: EmployeeActionDef[] = [
     action: "createTask",
     label: "إنشاء مهمة في كليك أب",
     inputs: [
-      { name: "workspaceId", label: "معرّف المساحة", required: true },
-      { name: "spaceId", label: "معرّف الفضاء", required: true },
+      { name: "workspaceId", label: "معرّف المساحة (اختياري)" },
+      { name: "spaceId", label: "معرّف الفضاء (اختياري)" },
       { name: "listId", label: "معرّف القائمة", required: true },
       { name: "name", label: "عنوان المهمة", required: true },
       { name: "description", label: "التفاصيل" },
@@ -736,7 +737,7 @@ export const employeeActions: EmployeeActionDef[] = [
     action: "comment",
     label: "تعليق على ملف فيجما",
     inputs: [
-      { name: "projectId", label: "معرّف المشروع", required: true },
+      { name: "projectId", label: "معرّف المشروع (اختياري)" },
       { name: "fileId", label: "معرّف الملف", required: true },
       { name: "message", label: "نص التعليق", required: true },
     ],
