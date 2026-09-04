@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import {
   ArrowLeft,
@@ -18,7 +19,8 @@ import {
 import { PageShell, PageHero } from "@/components/site/PageShell";
 import { Reveal } from "@/components/Reveal";
 import { supabase } from "@/integrations/supabase/client";
-import { signIn, signUp } from "@/lib/auth";
+import { signIn } from "@/lib/auth";
+import { createAccount } from "@/lib/signup.functions";
 import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
@@ -84,6 +86,7 @@ function arabicError(message: string) {
 function AuthPage() {
   const search = useSearch({ from: "/auth" });
   const navigate = useNavigate();
+  const createAccountFn = useServerFn(createAccount);
   const [mode, setMode] = useState<"signup" | "signin">(search.mode ?? "signup");
 
   const [fullName, setFullName] = useState("");
@@ -155,19 +158,28 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        await signUp({
-          email: email.trim(),
-          password,
-          fullName: fullName.trim(),
-          company: company.trim(),
-          dialect,
+        const res = await createAccountFn({
+          data: {
+            email: email.trim(),
+            password,
+            fullName: fullName.trim(),
+            company: company.trim(),
+            dialect,
+          },
         });
-        const { data } = await supabase.auth.getSession();
-        if (data.session) {
-          await navigate({ to: "/onboarding", replace: true });
+        if (!res.ok) {
+          setFormError(
+            res.reason === "duplicate"
+              ? "هذا البريد مسجّل بالفعل — سجّل الدخول أو استعد كلمة المرور."
+              : res.reason === "password"
+                ? "كلمة المرور غير مقبولة — اجعلها ٨ أحرف على الأقل وأقوى."
+                : "تعذّر إنشاء الحساب الآن — أعد المحاولة بعد لحظات.",
+          );
           return;
         }
-        setEmailSent(true);
+        await signIn(email.trim(), password);
+        await navigate({ to: "/onboarding", replace: true });
+        return;
       } else {
         await signIn(email.trim(), password);
         await navigate({ to: "/app", replace: true });
