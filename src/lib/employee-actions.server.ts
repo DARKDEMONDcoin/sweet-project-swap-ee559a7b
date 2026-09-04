@@ -311,8 +311,8 @@ export const employeeActions: EmployeeActionDef[] = [
     ],
     toProps: (v) => ({
       listId: v["listId"],
-      subscriberHash: v["email"].trim().toLowerCase(),
-      emailAddress: v["email"].trim(),
+      subscriberHash: (v["email"] ?? "").trim().toLowerCase(),
+      emailAddress: (v["email"] ?? "").trim(),
       statusIfNew: v["status"] || "subscribed",
       status: v["status"] || "subscribed",
     }),
