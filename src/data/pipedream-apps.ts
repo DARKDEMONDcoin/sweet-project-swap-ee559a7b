@@ -85,16 +85,6 @@ export const pipedreamApps: PipedreamApp[] = [
     accountProp: "youtubeDataApi",
   },
   {
-    provider: "threads",
-    slug: "threads",
-    label: "ثريدز",
-    publishComponent: "threads-post-thread",
-    accountProp: "threads",
-    actions: {
-      post: { component: "threads-post-thread", accountProp: "threads", label: "نشر منشور" },
-    },
-  },
-  {
     provider: "pinterest",
     slug: "pinterest",
     label: "بينترست",
@@ -247,12 +237,12 @@ export const pipedreamApps: PipedreamApp[] = [
   },
   {
     provider: "slack",
-    slug: "slack",
+    slug: "slack_v2",
     label: "سلاك",
-    publishComponent: "slack-send-message",
+    publishComponent: "slack_v2-send-message",
     accountProp: "slack",
     actions: {
-      send: { component: "slack-send-message", accountProp: "slack", label: "إرسال رسالة" },
+      send: { component: "slack_v2-send-message", accountProp: "slack", label: "إرسال رسالة" },
     },
   },
   {

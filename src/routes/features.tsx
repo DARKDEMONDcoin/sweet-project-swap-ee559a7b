@@ -97,7 +97,6 @@ const apps = [
   "tiktok",
   "facebook",
   "youtube",
-  "threads",
   "gmail",
   "outlook",
   "calendar",

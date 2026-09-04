@@ -184,6 +184,8 @@ export async function proxyRequest<T = unknown>(
     url: string;
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     body?: unknown;
+    /** جسم نصي جاهز (مثل form-urlencoded) بدلاً من JSON. */
+    rawBody?: string;
     headers?: Record<string, string>;
   },
 ): Promise<T> {
@@ -192,14 +194,21 @@ export async function proxyRequest<T = unknown>(
     external_user_id: externalUserId(params.workspaceId),
     account_id: params.accountId,
   });
+  const body =
+    params.rawBody !== undefined
+      ? params.rawBody
+      : params.body === undefined
+        ? undefined
+        : JSON.stringify(params.body);
   return call<T>(config, `/proxy/${encoded}?${search.toString()}`, {
     method: params.method ?? "GET",
-    ...(params.body === undefined ? {} : { body: JSON.stringify(params.body) }),
+    ...(body === undefined ? {} : { body }),
     headers: Object.fromEntries(
       Object.entries(params.headers ?? {}).map(([k, v]) => [`x-pd-proxy-${k}`, v]),
     ),
   });
 }
+
 
 function base64Url(value: string): string {
   const bytes = new TextEncoder().encode(value);

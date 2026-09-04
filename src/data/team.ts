@@ -52,7 +52,7 @@ export const team: TeamMember[] = [
       { k: "نمو التفاعل", v: "3.2×" },
       { k: "منصات", v: "7" },
     ],
-    apps: ["instagram", "x", "linkedin", "tiktok", "facebook", "youtube", "threads"],
+    apps: ["instagram", "x", "linkedin", "tiktok", "facebook", "youtube"],
     skills: ["كتابة إعلانية", "تصميم بصري", "جدولة ذكية", "تحليل تفاعل"],
     sample: [
       {

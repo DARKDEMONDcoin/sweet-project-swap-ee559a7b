@@ -20,7 +20,7 @@ import {
   hideComment,
   replyToMessenger,
 } from "./social-inbox.server";
-import { publishThreads, createPin } from "./social-extra.server";
+import { createPin } from "./social-extra.server";
 import { metaAdsSummary } from "./ads-insights.server";
 import { sendWhatsappText, createDriveFolder } from "./messaging-extra.server";
 
@@ -578,22 +578,7 @@ export const employeeActions: EmployeeActionDef[] = [
     }),
   },
 
-  /* ————— منصات إضافية: ثريدز وبينترست ————— */
-  {
-    id: "sonny-post-threads",
-    employeeId: "sonny",
-    provider: "threads",
-    label: "نشر منشور على ثريدز",
-    inputs: [
-      { name: "text", label: "النص", required: true },
-      { name: "imageUrl", label: "رابط صورة (اختياري)" },
-    ],
-    run: ({ config, workspaceId, accountId, values }) =>
-      publishThreads(config, workspaceId, accountId, {
-        text: values["text"]!,
-        ...(values["imageUrl"]?.trim() ? { imageUrl: values["imageUrl"].trim() } : {}),
-      }),
-  },
+  /* ————— منصات إضافية: بينترست ————— */
   {
     id: "sonny-create-pin",
     employeeId: "sonny",
@@ -921,6 +906,19 @@ export async function runEmployeeActionServer(
 
   if (def.run) {
     const result = await def.run({
+      config,
+      workspaceId: params.workspaceId,
+      accountId: account.account_id,
+      values: params.values,
+    });
+    return { actionId: def.id, provider: def.provider, result };
+  }
+
+  // المسار المضمون: تنفيذ مباشر على واجهة المنصة عبر وكيل Pipedream.
+  const { directActions } = await import("./direct-actions.server");
+  const direct = directActions[def.id];
+  if (direct) {
+    const result = await direct({
       config,
       workspaceId: params.workspaceId,
       accountId: account.account_id,
