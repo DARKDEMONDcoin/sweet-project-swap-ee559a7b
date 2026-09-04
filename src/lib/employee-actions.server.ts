@@ -89,7 +89,12 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "subject", label: "الموضوع", required: true },
       { name: "body", label: "النص", required: true },
     ],
-    toProps: (v) => ({ toRecipients: [v["to"]], subject: v["subject"], content: v["body"] }),
+    toProps: (v) => ({
+      recipients: [v["to"]],
+      subject: v["subject"],
+      content: v["body"],
+      contentType: "Text",
+    }),
   },
   {
     id: "eva-create-event",
@@ -144,14 +149,18 @@ export const employeeActions: EmployeeActionDef[] = [
     label: "إنشاء صفقة في هابسبوت",
     inputs: [
       { name: "dealname", label: "اسم الصفقة", required: true },
+      { name: "pipeline", label: "خط البيع", required: true },
+      { name: "dealstage", label: "المرحلة", required: true },
       { name: "amount", label: "القيمة" },
-      { name: "dealstage", label: "المرحلة" },
+      { name: "closedate", label: "تاريخ الإغلاق (YYYY-MM-DD)" },
     ],
     toProps: (v) => ({
-      properties: {
-        dealname: v["dealname"],
-        amount: v["amount"] ?? "",
-        dealstage: v["dealstage"] ?? "",
+      dealname: v["dealname"],
+      pipeline: v["pipeline"],
+      dealstage: v["dealstage"],
+      objectProperties: {
+        ...(v["amount"]?.trim() ? { amount: v["amount"].trim() } : {}),
+        ...(v["closedate"]?.trim() ? { closedate: v["closedate"].trim() } : {}),
       },
     }),
   },
@@ -163,13 +172,16 @@ export const employeeActions: EmployeeActionDef[] = [
     label: "تسجيل صف في جوجل شيتس",
     inputs: [
       { name: "sheetId", label: "معرّف الملف", required: true },
-      { name: "sheetName", label: "اسم الورقة", required: true },
+      { name: "worksheetId", label: "معرّف الورقة (رقم gid)", required: true },
       { name: "row", label: "القيم مفصولة بفاصلة", required: true },
     ],
     toProps: (v) => ({
       sheetId: v["sheetId"],
-      sheetName: v["sheetName"],
-      cells: (v["row"] ?? "").split(",").map((s) => s.trim()),
+      worksheetId: Number(v["worksheetId"]) || 0,
+      myColumnData: (v["row"] ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
     }),
   },
   {
@@ -180,13 +192,16 @@ export const employeeActions: EmployeeActionDef[] = [
     label: "تسجيل نتيجة قياس في شيتس",
     inputs: [
       { name: "sheetId", label: "معرّف الملف", required: true },
-      { name: "sheetName", label: "اسم الورقة", required: true },
+      { name: "worksheetId", label: "معرّف الورقة (رقم gid)", required: true },
       { name: "row", label: "القيم مفصولة بفاصلة", required: true },
     ],
     toProps: (v) => ({
       sheetId: v["sheetId"],
-      sheetName: v["sheetName"],
-      cells: (v["row"] ?? "").split(",").map((s) => s.trim()),
+      worksheetId: Number(v["worksheetId"]) || 0,
+      myColumnData: (v["row"] ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
     }),
   },
   {
@@ -199,7 +214,12 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "channel", label: "القناة", required: true },
       { name: "text", label: "النص", required: true },
     ],
-    toProps: (v) => ({ conversation: v["channel"], text: v["text"] }),
+    toProps: (v) => ({
+      channelType: "PUBLIC",
+      conversation: v["channel"],
+      text: v["text"],
+      mrkdwn: true,
+    }),
   },
 
   /* ————— السوشيال: تعليقات ورسائل الصفحات ————— */
@@ -294,8 +314,8 @@ export const employeeActions: EmployeeActionDef[] = [
     toProps: (v) => ({
       LastName: v["LastName"],
       Company: v["Company"],
-      Email: v["Email"] ?? "",
-      Phone: v["Phone"] ?? "",
+      ...(v["Email"]?.trim() ? { Email: v["Email"].trim() } : {}),
+      ...(v["Phone"]?.trim() ? { Phone: v["Phone"].trim() } : {}),
     }),
   },
   {
@@ -329,9 +349,9 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "content", label: "المحتوى" },
     ],
     toProps: (v) => ({
-      parent: { page_id: v["parentId"] },
+      parent: v["parentId"],
       title: v["title"],
-      pageContent: v["content"] ?? "",
+      ...(v["content"]?.trim() ? { content: v["content"].trim() } : {}),
     }),
   },
 
