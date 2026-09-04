@@ -506,11 +506,11 @@ function Field({
   icon: typeof Mail;
   value: string;
   onChange: (v: string) => void;
-  placeholder?: string;
-  autoComplete?: string;
+  placeholder?: string | undefined;
+  autoComplete?: string | undefined;
   type?: string;
   dir?: "ltr" | "rtl";
-  error?: string;
+  error?: string | undefined;
 }) {
   return (
     <div>
