@@ -6,7 +6,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
 import { pipedreamApp } from "@/data/pipedream-apps";
-import { pipedreamConfig, runAction, missingConfigError } from "./pipedream.server";
+import { pipedreamConfig, runAction, proxyRequest, missingConfigError, type PipedreamConfig } from "./pipedream.server";
+import { pageTarget } from "./social-inbox.server";
 
 type Admin = SupabaseClient<Database>;
 
@@ -70,6 +71,58 @@ export async function publishToPlatform(
   });
 
   return { provider: params.provider, accountId: account.account_id, result };
+}
+
+
+const GRAPH = "https://graph.facebook.com/v21.0";
+
+/** نشر على إنستجرام (حاوية ثم نشر) أو على صفحة فيسبوك — عبر وكيل Pipedream. */
+async function publishMeta(
+  config: PipedreamConfig,
+  workspaceId: string,
+  accountId: string,
+  provider: "instagram" | "facebook",
+  text: string,
+  imageUrl?: string,
+): Promise<unknown> {
+  const page = await pageTarget(config, workspaceId, accountId);
+  if (!page) throw new Error("تعذّر تحديد الصفحة المرتبطة بحسابك على ميتا.");
+
+  if (provider === "facebook") {
+    const query = new URLSearchParams({ message: text, access_token: page.token });
+    if (imageUrl) query.set("link", imageUrl);
+    return proxyRequest<unknown>(config, {
+      workspaceId,
+      accountId,
+      method: "POST",
+      url: `${GRAPH}/${page.id}/feed?${query.toString()}`,
+    });
+  }
+
+  if (!page.igId) throw new Error("لا يوجد حساب إنستجرام احترافي مرتبط بالصفحة.");
+  if (!imageUrl) throw new Error("إنستجرام يتطلب صورة مع المنشور.");
+
+  const container = await proxyRequest<{ id?: string }>(config, {
+    workspaceId,
+    accountId,
+    method: "POST",
+    url: `${GRAPH}/${page.igId}/media?${new URLSearchParams({
+      image_url: imageUrl,
+      caption: text,
+      access_token: page.token,
+    }).toString()}`,
+  });
+  if (!container.id) throw new Error("تعذّر تجهيز منشور إنستجرام.");
+
+  return proxyRequest<unknown>(config, {
+    workspaceId,
+    accountId,
+    method: "POST",
+    url: `${GRAPH}/${page.igId}/media_publish?${new URLSearchParams({
+      creation_id: container.id,
+      access_token: page.token,
+    }).toString()}`,
+  });
 }
 
 /** اسم حقل النص يختلف بين إجراءات كل منصة. */
