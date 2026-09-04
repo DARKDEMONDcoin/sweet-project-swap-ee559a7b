@@ -40,7 +40,7 @@ export const startPipedreamConnect = createServerFn({ method: "POST" })
     z
       .object({
         workspaceId: z.string().uuid(),
-        provider: z.string().min(2).max(40),
+        provider: z.string().min(1).max(40),
         origin: z.string().url(),
       })
       .parse(input),
@@ -136,7 +136,7 @@ export const syncPipedreamAccounts = createServerFn({ method: "POST" })
 export const disconnectPipedream = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ workspaceId: z.string().uuid(), provider: z.string().min(2).max(40) }).parse(input),
+    z.object({ workspaceId: z.string().uuid(), provider: z.string().min(1).max(40) }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const admin = await assertOwner(context.supabase, data.workspaceId);
@@ -180,7 +180,7 @@ export const publishViaPipedream = createServerFn({ method: "POST" })
     z
       .object({
         workspaceId: z.string().uuid(),
-        provider: z.string().min(2).max(40),
+        provider: z.string().min(1).max(40),
         text: z.string().min(1).max(20_000),
         imageUrl: z.string().url().optional(),
       })
