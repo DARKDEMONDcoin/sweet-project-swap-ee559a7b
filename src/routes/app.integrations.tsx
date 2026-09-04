@@ -65,6 +65,7 @@ function IntegrationsPage() {
   const disconnectPd = useServerFn(disconnectPipedream);
   const checkPipedream = useServerFn(pipedreamStatus);
   const [pdReady, setPdReady] = useState<boolean | null>(null);
+  const [pdEnv, setPdEnv] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [wpOpen, setWpOpen] = useState(false);
   const [gscOpen, setGscOpen] = useState(false);
@@ -77,7 +78,10 @@ function IntegrationsPage() {
 
   useEffect(() => {
     void checkPipedream({ data: undefined })
-      .then((r) => setPdReady(r.ready))
+      .then((r) => {
+        setPdReady(r.ready);
+        setPdEnv(r.environment ?? null);
+      })
       .catch(() => setPdReady(false));
   }, [checkPipedream]);
 
@@ -238,7 +242,9 @@ function IntegrationsPage() {
         <p className="flex-1 text-sm font-semibold">
           {pdReady === false
             ? "وسيط التكاملات (Pipedream) غير مفعّل بعد — أضف مفاتيح Pipedream ليعمل ربط منصات التواصل والبريد وCRM."
-            : "منصات التواصل والبريد وCRM تُربط عبر Pipedream — لا نحتفظ بأي كلمات مرور أو توكنات لديك."}
+            : pdEnv === "development"
+              ? "وسيط الربط يعمل حالياً بوضع التجريب — الربط لن ينجح إلا لمن لديه حساب على Pipedream. حوّل PIPEDREAM_ENVIRONMENT إلى production ليربط عملاؤك حساباتهم."
+              : "منصات التواصل والبريد وCRM تُربط عبر Pipedream — لا نحتفظ بأي كلمات مرور أو توكنات لديك."}
         </p>
         <button
           onClick={() => void refresh()}
