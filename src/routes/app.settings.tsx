@@ -223,3 +223,104 @@ function SettingsPage() {
     </AppShell>
   );
 }
+
+function AiKeysPanel() {
+  const queryClient = useQueryClient();
+  const load = useServerFn(getAiKeys);
+  const save = useServerFn(saveAiKeys);
+  const test = useServerFn(testAiKeys);
+  const [note, setNote] = useState<string | null>(null);
+
+  const { data: keys } = useQuery({ queryKey: ["ai-keys"], queryFn: () => load() });
+
+  const saveMutation = useMutation({
+    mutationFn: (input: { gemini: string; openrouter: string }) => save({ data: input }),
+    onSuccess: async (res) => {
+      setNote(
+        res.saved > 0 ? "تم حفظ المفاتيح في قاعدة بيانات سوبابيز." : "لم تُدخل أي مفتاح جديد.",
+      );
+      await queryClient.invalidateQueries({ queryKey: ["ai-keys"] });
+    },
+    onError: () => setNote("تعذّر الحفظ. جرّب مرة أخرى."),
+  });
+
+  const testMutation = useMutation({
+    mutationFn: () => test(),
+    onSuccess: (res) => setNote(res.message),
+    onError: () => setNote("تعذّر الاختبار."),
+  });
+
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const f = new FormData(e.currentTarget);
+        saveMutation.mutate({
+          gemini: String(f.get("gemini") ?? ""),
+          openrouter: String(f.get("openrouter") ?? ""),
+        });
+        e.currentTarget.reset();
+      }}
+    >
+      <h2 className="font-display text-xl font-black">مفاتيح الذكاء الاصطناعي</h2>
+      <p className="text-sm text-ink-soft">
+        الصق مفاتيحك هنا مرة واحدة، وتُحفظ مشفّرة الوصول داخل قاعدة بيانات سوبابيز الخاصة بك ولا
+        تظهر لأي متصفح بعد الحفظ.
+      </p>
+
+      {note ? (
+        <p className="rounded-2xl bg-jade/12 px-4 py-3 text-sm font-semibold text-jade-deep">
+          {note}
+        </p>
+      ) : null}
+
+      <div className="space-y-3">
+        {(keys ?? []).map((k) => (
+          <div
+            key={k.name}
+            className="flex items-center justify-between rounded-2xl border border-border px-4 py-3 text-sm"
+          >
+            <span className="font-bold">{k.name === "GEMINI_API_KEY" ? "Gemini" : "OpenRouter"}</span>
+            <span className={k.configured ? "font-semibold text-jade-deep" : "text-muted-foreground"}>
+              {k.configured ? `محفوظ (${k.preview})` : "غير محفوظ"}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <label className="block">
+        <span className="mb-2 block text-sm font-bold">مفتاح Gemini</span>
+        <input name="gemini" type="password" autoComplete="off" placeholder="AIza…" className={field} />
+      </label>
+      <label className="block">
+        <span className="mb-2 block text-sm font-bold">مفتاح OpenRouter</span>
+        <input
+          name="openrouter"
+          type="password"
+          autoComplete="off"
+          placeholder="sk-or-…"
+          className={field}
+        />
+      </label>
+
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="submit"
+          disabled={saveMutation.isPending}
+          className="rounded-full bg-foreground px-6 py-2.5 text-sm font-bold text-background disabled:opacity-60"
+        >
+          {saveMutation.isPending ? "جارٍ الحفظ…" : "حفظ المفاتيح"}
+        </button>
+        <button
+          type="button"
+          onClick={() => testMutation.mutate()}
+          disabled={testMutation.isPending}
+          className="rounded-full border border-border px-6 py-2.5 text-sm font-bold disabled:opacity-60"
+        >
+          {testMutation.isPending ? "جارٍ الاختبار…" : "اختبار الاتصال"}
+        </button>
+      </div>
+    </form>
+  );
+}
