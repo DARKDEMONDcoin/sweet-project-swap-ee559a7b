@@ -407,6 +407,7 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "from", label: "الرقم المرسل", required: true },
       { name: "to", label: "رقم العميل", required: true },
       { name: "body", label: "النص", required: true },
+      { name: "accountSid", label: "معرّف حساب تويليو (اختياري)" },
     ],
     toProps: (v) => ({ from: v["from"], to: v["to"], body: v["body"] }),
   },
