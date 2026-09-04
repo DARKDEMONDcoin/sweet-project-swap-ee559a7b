@@ -31,29 +31,13 @@ const SECRET_NAMES = [
   "PIPEDREAM_ENVIRONMENT",
 ] as const;
 
-/** يقرأ إعدادات Pipedream من Supabase ثم من البيئة. */
+/** يقرأ إعدادات Pipedream عبر الطبقة الموحّدة للأسرار (جدول app_secrets في Supabase). */
 export async function pipedreamConfig(): Promise<PipedreamConfig | null> {
   if (configCache && Date.now() - configCache.at < CONFIG_TTL) return configCache.value;
 
-  const found: Record<string, string> = {};
-  try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
-      .from("app_secrets")
-      .select("name, value")
-      .in("name", SECRET_NAMES as unknown as string[]);
-    for (const row of (data ?? []) as { name: string; value: string }[]) {
-      if (row.value?.trim()) found[row.name] = row.value.trim();
-    }
-  } catch {
-    // نكمل بالبيئة
-  }
-  for (const name of SECRET_NAMES) {
-    if (!found[name]) {
-      const fromEnv = process.env[name];
-      if (fromEnv?.trim()) found[name] = fromEnv.trim();
-    }
-  }
+  const { getSecrets } = await import("./secrets.server");
+  const found: Record<string, string> = await getSecrets(SECRET_NAMES);
+
 
   const clientId = found["PIPEDREAM_CLIENT_ID"] ?? "";
   const clientSecret = found["PIPEDREAM_CLIENT_SECRET"] ?? "";
