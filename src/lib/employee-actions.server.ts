@@ -807,7 +807,8 @@ export const employeeActions: EmployeeActionDef[] = [
     inputs: [
       { name: "amount", label: "المبلغ بأصغر وحدة (هللة/سنت)", required: true },
       { name: "currency", label: "العملة (مثل sar)", required: true },
-      { name: "country", label: "الدولة (مثل SA)", required: true },
+      { name: "country", label: "الدولة (مثل SA)" },
+      { name: "description", label: "وصف الطلب (اختياري)" },
     ],
     toProps: (v) => ({
       amount: Math.max(1, Number(v["amount"]) || 1),
