@@ -242,7 +242,9 @@ function IntegrationsPage() {
         <p className="flex-1 text-sm font-semibold">
           {pdReady === false
             ? "وسيط التكاملات (Pipedream) غير مفعّل بعد — أضف مفاتيح Pipedream ليعمل ربط منصات التواصل والبريد وCRM."
-            : "منصات التواصل والبريد وCRM تُربط عبر Pipedream — لا نحتفظ بأي كلمات مرور أو توكنات لديك."}
+            : pdEnv === "development"
+              ? "وسيط الربط يعمل حالياً بوضع التجريب — الربط لن ينجح إلا لمن لديه حساب على Pipedream. حوّل PIPEDREAM_ENVIRONMENT إلى production ليربط عملاؤك حساباتهم."
+              : "منصات التواصل والبريد وCRM تُربط عبر Pipedream — لا نحتفظ بأي كلمات مرور أو توكنات لديك."}
         </p>
         <button
           onClick={() => void refresh()}
