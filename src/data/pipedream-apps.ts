@@ -37,8 +37,8 @@ export const pipedreamApps: PipedreamApp[] = [
     provider: "instagram",
     slug: "instagram_business",
     label: "إنستجرام",
-    publishComponent: "instagram_business-create-media-post",
-    accountProp: "instagram_business",
+    publishComponent: "instagram_business-create-post",
+    accountProp: "instagram",
     note: "يتطلب حساب Instagram احترافي مرتبط بصفحة فيسبوك.",
   },
   {
@@ -46,7 +46,7 @@ export const pipedreamApps: PipedreamApp[] = [
     slug: "facebook_pages",
     label: "فيسبوك",
     publishComponent: "facebook_pages-create-post",
-    accountProp: "facebook_pages",
+    accountProp: "facebookPages",
     note: "الربط يتم على مستوى الصفحة وليس الحساب الشخصي.",
   },
   {
@@ -61,14 +61,21 @@ export const pipedreamApps: PipedreamApp[] = [
     slug: "twitter",
     label: "إكس",
     publishComponent: "twitter-create-tweet",
-    accountProp: "twitter",
+    accountProp: "app",
     note: "النشر عبر واجهة X يتطلب خطة مطوّر مدفوعة لدى X.",
   },
   {
     provider: "tiktok",
-    slug: "tiktok",
+    slug: "tiktok_ads_manager",
     label: "تيك توك",
-    note: "النشر المباشر يحتاج اعتماد تطبيقك من TikTok؛ الربط متاح الآن للقراءة.",
+    note: "متاح لدى Pipedream عبر TikTok Ads Manager (تقارير وحملات)؛ النشر العضوي يحتاج اعتماد تطبيق من TikTok.",
+    actions: {
+      report: {
+        component: "tiktok_ads_manager-get-report",
+        accountProp: "app",
+        label: "تقرير حملات تيك توك",
+      },
+    },
   },
   {
     provider: "youtube",
@@ -95,11 +102,11 @@ export const pipedreamApps: PipedreamApp[] = [
     slug: "microsoft_outlook",
     label: "أوتلوك",
     publishComponent: "microsoft_outlook-send-email",
-    accountProp: "microsoft_outlook",
+    accountProp: "microsoftOutlook",
     actions: {
       send: {
         component: "microsoft_outlook-send-email",
-        accountProp: "microsoft_outlook",
+        accountProp: "microsoftOutlook",
         label: "إرسال بريد",
       },
     },
@@ -133,11 +140,11 @@ export const pipedreamApps: PipedreamApp[] = [
     provider: "hubspot",
     slug: "hubspot",
     label: "هابسبوت",
-    publishComponent: "hubspot-create-contact",
+    publishComponent: "hubspot-create-or-update-contact",
     accountProp: "hubspot",
     actions: {
       createContact: {
-        component: "hubspot-create-contact",
+        component: "hubspot-create-or-update-contact",
         accountProp: "hubspot",
         label: "إضافة جهة اتصال",
       },
@@ -151,7 +158,7 @@ export const pipedreamApps: PipedreamApp[] = [
     actions: {
       createLead: {
         component: "salesforce_rest_api-create-lead",
-        accountProp: "salesforce_rest_api",
+        accountProp: "salesforce",
         label: "إضافة عميل محتمل",
       },
     },
@@ -194,7 +201,7 @@ export const pipedreamApps: PipedreamApp[] = [
     actions: {
       createRecord: {
         component: "airtable_oauth-create-single-record",
-        accountProp: "airtable_oauth",
+        accountProp: "airtable",
         label: "إضافة سجل",
       },
     },
@@ -205,7 +212,7 @@ export const pipedreamApps: PipedreamApp[] = [
     label: "ميلتشمب",
     actions: {
       addSubscriber: {
-        component: "mailchimp-add-subscriber-to-list",
+        component: "mailchimp-add-or-update-subscriber",
         accountProp: "mailchimp",
         label: "إضافة مشترك",
       },
@@ -216,20 +223,138 @@ export const pipedreamApps: PipedreamApp[] = [
     provider: "telegram",
     slug: "telegram_bot_api",
     label: "تيليجرام",
-    publishComponent: "telegram_bot_api-send-message",
-    accountProp: "telegram_bot_api",
+    publishComponent: "telegram_bot_api-send-text-message-or-reply",
+    accountProp: "telegramBotApi",
     actions: {
       send: {
-        component: "telegram_bot_api-send-message",
-        accountProp: "telegram_bot_api",
+        component: "telegram_bot_api-send-text-message-or-reply",
+        accountProp: "telegramBotApi",
         label: "إرسال رسالة تيليجرام",
       },
     },
   },
   { provider: "figma", slug: "figma", label: "فيجما" },
   { provider: "canva", slug: "canva", label: "كانفا" },
-  { provider: "meta-ads", slug: "facebook_ads", label: "إعلانات ميتا" },
-  { provider: "google-ads", slug: "google_ads", label: "إعلانات جوجل" },
+  { provider: "meta-ads", slug: "facebook_graph_api", label: "إعلانات ميتا" },
+  {
+    provider: "google-ads",
+    slug: "google_ads",
+    label: "إعلانات جوجل",
+    actions: {
+      report: { component: "google_ads-create-report", accountProp: "googleAds", label: "تقرير أداء" },
+    },
+  },
+  {
+    provider: "discord",
+    slug: "discord",
+    label: "ديسكورد",
+    publishComponent: "discord-send-message",
+    accountProp: "discord",
+    actions: {
+      send: { component: "discord-send-message", accountProp: "discord", label: "إرسال رسالة" },
+    },
+  },
+  {
+    provider: "reddit",
+    slug: "reddit",
+    label: "ريديت",
+    actions: {
+      submitPost: { component: "reddit-submit-a-post", accountProp: "reddit", label: "نشر موضوع" },
+    },
+  },
+  {
+    provider: "bluesky",
+    slug: "bluesky",
+    label: "بلوسكاي",
+    publishComponent: "bluesky-create-post",
+    accountProp: "app",
+    actions: {
+      post: { component: "bluesky-create-post", accountProp: "app", label: "نشر منشور" },
+    },
+  },
+  {
+    provider: "trello",
+    slug: "trello",
+    label: "تريلو",
+    actions: {
+      createCard: { component: "trello-create-card", accountProp: "app", label: "إنشاء كرت" },
+    },
+  },
+  {
+    provider: "asana",
+    slug: "asana",
+    label: "أسانا",
+    actions: {
+      createTask: { component: "asana-create-task", accountProp: "asana", label: "إنشاء مهمة" },
+    },
+  },
+  {
+    provider: "jira",
+    slug: "jira",
+    label: "جيرا",
+    actions: {
+      createIssue: { component: "jira-create-issue", accountProp: "app", label: "إنشاء تذكرة" },
+    },
+  },
+  {
+    provider: "clickup",
+    slug: "clickup",
+    label: "كليك أب",
+    actions: {
+      createTask: { component: "clickup-create-task", accountProp: "clickup", label: "إنشاء مهمة" },
+    },
+  },
+  {
+    provider: "monday",
+    slug: "monday",
+    label: "مندي",
+    actions: {
+      createItem: { component: "monday-create-item", accountProp: "monday", label: "إضافة عنصر" },
+    },
+  },
+  {
+    provider: "zoom",
+    slug: "zoom",
+    label: "زوم",
+    actions: {
+      createMeeting: { component: "zoom-create-meeting", accountProp: "zoom", label: "إنشاء اجتماع" },
+    },
+  },
+  {
+    provider: "pipedrive",
+    slug: "pipedrive",
+    label: "بايبدرايف",
+    actions: {
+      addDeal: { component: "pipedrive-add-deal", accountProp: "pipedriveApp", label: "إنشاء صفقة" },
+      addPerson: {
+        component: "pipedrive-add-person",
+        accountProp: "pipedriveApp",
+        label: "إضافة جهة اتصال",
+      },
+    },
+  },
+  {
+    provider: "intercom",
+    slug: "intercom",
+    label: "إنتركوم",
+    actions: {
+      sendMessage: {
+        component: "intercom-send-message-to-contact",
+        accountProp: "intercom",
+        label: "مراسلة عميل",
+      },
+    },
+  },
+  {
+    provider: "twilio",
+    slug: "twilio",
+    label: "تويليو (SMS)",
+    publishComponent: "twilio-send-message",
+    accountProp: "twilio",
+    actions: {
+      sendSms: { component: "twilio-send-message", accountProp: "twilio", label: "إرسال SMS" },
+    },
+  },
   { provider: "google-business", slug: "google_my_business", label: "نشاطي على جوجل" },
 ];
 
