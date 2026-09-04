@@ -93,13 +93,19 @@ function IntegrationsPage() {
     if (status === "connected") setGscOpen(true);
     else if (status) setError(gscMessages[status] ?? "تعذّر إكمال ربط Search Console.");
     if (pd === "failed") setError("لم يكتمل الربط عبر Pipedream — جرّب مرة أخرى.");
-    if (pd === "connected" && workspace) {
-      void syncAccounts({ data: { workspaceId: workspace.id } })
-        .then(() => qc.invalidateQueries({ queryKey: ["integrations", workspace.id] }))
-        .catch(() => setError("تم الربط لكن تعذّرت المزامنة — اضغط «تحديث الحسابات»."));
-    }
+    if (pd === "connected") setPendingSync(true);
     window.history.replaceState({}, "", window.location.pathname);
-  }, [workspace, qc, syncAccounts]);
+    // نقرأ علامات العودة مرة واحدة فقط. لا نعتمد على جاهزية مساحة العمل هنا،
+    // وإلا يُمسح `?pd=connected` قبل بدء المزامنة فيظهر الربط كأنه لم يحدث.
+  }, []);
+
+  useEffect(() => {
+    if (!pendingSync || !workspace) return;
+    setPendingSync(false);
+    void syncAccounts({ data: { workspaceId: workspace.id } })
+      .then(() => qc.invalidateQueries({ queryKey: ["integrations", workspace.id] }))
+      .catch(() => setError("تم الربط لكن تعذّرت المزامنة — اضغط «تحديث الحسابات»."));
+  }, [pendingSync, workspace, qc, syncAccounts]);
 
   const all = integrations ?? [];
   const connected = all.filter((i) => i.status === "connected").length;
