@@ -21,7 +21,8 @@ export async function publishToPlatform(
   params: { workspaceId: string; provider: string; text: string; imageUrl?: string },
 ): Promise<PublishResult> {
   const app = pipedreamApp(params.provider);
-  if (!app?.publishComponent || !app.accountProp) {
+  const metaProxy = params.provider === "instagram" || params.provider === "facebook";
+  if (!metaProxy && (!app?.publishComponent || !app.accountProp)) {
     throw new Error(`النشر المباشر غير متاح بعد على ${app?.label ?? params.provider}.`);
   }
 
@@ -36,7 +37,25 @@ export async function publishToPlatform(
     .eq("status", "connected")
     .maybeSingle();
 
-  if (!account) throw new Error(`${app.label} غير مربوط بعد — اربطه من صفحة التكاملات.`);
+  if (!account) throw new Error(`${app?.label ?? params.provider} غير مربوط بعد — اربطه من صفحة التكاملات.`);
+
+  // ميتا (إنستجرام/فيسبوك): ننشر عبر Graph API مباشرة من خلال وكيل Pipedream،
+  // لأن الإجراءات الجاهزة لا تدعم النص الكامل مع الصورة على إنستجرام.
+  if (metaProxy) {
+    const result = await publishMeta(
+      config,
+      params.workspaceId,
+      account.account_id,
+      params.provider as "instagram" | "facebook",
+      params.text,
+      params.imageUrl,
+    );
+    return { provider: params.provider, accountId: account.account_id, result };
+  }
+  if (!app?.publishComponent || !app.accountProp) {
+    throw new Error(`النشر المباشر غير متاح بعد على ${params.provider}.`);
+  }
+
 
   const props: Record<string, unknown> = {
     [app.accountProp]: { authProvisionId: account.account_id },
