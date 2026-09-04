@@ -66,13 +66,24 @@ export function Nav({ variant = "over" }: { variant?: "over" | "solid" }) {
             جرّب الموظفين
           </Link>
           <Link
-            to="/contact"
+            to="/auth"
+            search={{ mode: "signin" as const }}
+            className={cn(
+              "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+              solid ? "text-ink-soft hover:text-primary" : "text-white/85 hover:text-white",
+            )}
+          >
+            دخول
+          </Link>
+          <Link
+            to="/auth"
+            search={{ mode: "signup" as const }}
             className={cn(
               "group relative overflow-hidden rounded-full px-5 py-2.5 text-sm font-bold transition-transform duration-300 hover:-translate-y-0.5",
               solid ? "bg-foreground text-background" : "bg-white text-ink",
             )}
           >
-            <span className="relative z-10">اطلب حسابك</span>
+            <span className="relative z-10">أنشئ حسابك</span>
           </Link>
         </div>
 
@@ -118,10 +129,11 @@ export function Nav({ variant = "over" }: { variant?: "over" | "solid" }) {
           <li>
             <Link
               onClick={() => setOpen(false)}
-              to="/contact"
+              to="/auth"
+              search={{ mode: "signup" as const }}
               className="mt-1 block rounded-xl bg-foreground px-3 py-2.5 text-center font-bold text-background"
             >
-              اطلب حسابك
+              أنشئ حسابك
             </Link>
           </li>
         </ul>
