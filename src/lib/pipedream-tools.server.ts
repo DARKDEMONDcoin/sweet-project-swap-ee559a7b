@@ -17,7 +17,7 @@ import {
   facebookMessages,
   inboxSummary,
 } from "./social-inbox.server";
-import { readThreads, readPinterest, readTikTok } from "./social-extra.server";
+import { readPinterest, readTikTok } from "./social-extra.server";
 import { metaAdsSummary } from "./ads-insights.server";
 import { readDrive } from "./messaging-extra.server";
 
@@ -59,7 +59,7 @@ const EMPTY: LiveContext = { block: "", used: [] };
 export const employeeReadProviders: Record<string, string[]> = {
   eva: ["gmail", "outlook", "calendar"],
   sam: ["hubspot", "gmail", "calendar"],
-  sonny: ["instagram", "facebook", "threads", "pinterest", "tiktok"],
+  sonny: ["instagram", "facebook", "pinterest", "tiktok"],
   adam: ["meta-ads"],
   dana: [],
   nour: [],
@@ -147,8 +147,6 @@ async function readProvider(
     case "facebook":
     case "instagram":
       return readMetaWithInbox(config, workspaceId, accountId, provider);
-    case "threads":
-      return readThreads(config, workspaceId, accountId);
     case "pinterest":
       return readPinterest(config, workspaceId, accountId);
     case "tiktok":

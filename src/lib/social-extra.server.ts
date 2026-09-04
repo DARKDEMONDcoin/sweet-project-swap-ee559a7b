@@ -1,65 +1,9 @@
 /**
- * منصات إضافية لسِراج: ثريدز، بينترست، تيك توك — عبر وكيل Pipedream.
+ * منصات إضافية لسِراج: بينترست، تيك توك — عبر وكيل Pipedream.
  * القراءة تغذّي سياق الموظف، والنشر لا يتم إلا بعد اعتماد المالك.
  */
 import { proxyRequest, type PipedreamConfig } from "./pipedream.server";
 
-type ThreadsUser = { id?: string };
-type ThreadsContainer = { id?: string };
-type ThreadsPosts = { data?: { text?: string; timestamp?: string; permalink?: string }[] };
-
-/** نشر منشور نصي (أو بصورة) على ثريدز عبر خطوتين: إنشاء الحاوية ثم النشر. */
-export async function publishThreads(
-  config: PipedreamConfig,
-  workspaceId: string,
-  accountId: string,
-  params: { text: string; imageUrl?: string },
-): Promise<{ id: string }> {
-  const me = await proxyRequest<ThreadsUser>(config, {
-    workspaceId,
-    accountId,
-    url: "https://graph.threads.net/v1.0/me?fields=id",
-  });
-  if (!me.id) throw new Error("تعذّر تحديد حساب ثريدز.");
-
-  const create = new URLSearchParams({
-    media_type: params.imageUrl ? "IMAGE" : "TEXT",
-    text: params.text,
-  });
-  if (params.imageUrl) create.set("image_url", params.imageUrl);
-
-  const container = await proxyRequest<ThreadsContainer>(config, {
-    workspaceId,
-    accountId,
-    method: "POST",
-    url: `https://graph.threads.net/v1.0/${me.id}/threads?${create.toString()}`,
-  });
-  if (!container.id) throw new Error("تعذّر تجهيز منشور ثريدز.");
-
-  const published = await proxyRequest<ThreadsContainer>(config, {
-    workspaceId,
-    accountId,
-    method: "POST",
-    url: `https://graph.threads.net/v1.0/${me.id}/threads_publish?creation_id=${container.id}`,
-  });
-  return { id: published.id ?? container.id };
-}
-
-/** آخر منشورات ثريدز لسياق الموظف. */
-export async function readThreads(
-  config: PipedreamConfig,
-  workspaceId: string,
-  accountId: string,
-): Promise<string> {
-  const res = await proxyRequest<ThreadsPosts>(config, {
-    workspaceId,
-    accountId,
-    url: "https://graph.threads.net/v1.0/me/threads?fields=text,timestamp,permalink&limit=10",
-  });
-  const items = res.data ?? [];
-  if (!items.length) return "لا منشورات حديثة على ثريدز.";
-  return items.map((p) => `- ${p.timestamp ?? "?"} | ${(p.text ?? "").slice(0, 160)}`).join("\n");
-}
 
 type PinterestBoards = { items?: { id: string; name?: string }[] };
 type PinterestPins = { items?: { id: string; title?: string; created_at?: string }[] };
