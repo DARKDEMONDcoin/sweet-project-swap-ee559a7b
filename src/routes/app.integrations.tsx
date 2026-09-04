@@ -65,6 +65,7 @@ function IntegrationsPage() {
   const disconnectPd = useServerFn(disconnectPipedream);
   const checkPipedream = useServerFn(pipedreamStatus);
   const [pdReady, setPdReady] = useState<boolean | null>(null);
+  const [pdEnv, setPdEnv] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [wpOpen, setWpOpen] = useState(false);
   const [gscOpen, setGscOpen] = useState(false);
@@ -77,7 +78,10 @@ function IntegrationsPage() {
 
   useEffect(() => {
     void checkPipedream({ data: undefined })
-      .then((r) => setPdReady(r.ready))
+      .then((r) => {
+        setPdReady(r.ready);
+        setPdEnv(r.environment ?? null);
+      })
       .catch(() => setPdReady(false));
   }, [checkPipedream]);
 
