@@ -64,6 +64,7 @@ function IntegrationsPage() {
   const syncAccounts = useServerFn(syncPipedreamAccounts);
   const disconnectPd = useServerFn(disconnectPipedream);
   const checkPipedream = useServerFn(pipedreamStatus);
+  const [isGuest, setIsGuest] = useState(false);
   const [pdReady, setPdReady] = useState<boolean | null>(null);
   const [pdEnv, setPdEnv] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
