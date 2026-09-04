@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
 import { pipedreamAction, pipedreamApp } from "@/data/pipedream-apps";
+import { extraEmployeeActions } from "./employee-actions-extra";
 import {
   pipedreamConfig,
   runAction,
@@ -406,6 +407,7 @@ export const employeeActions: EmployeeActionDef[] = [
       { name: "from", label: "الرقم المرسل", required: true },
       { name: "to", label: "رقم العميل", required: true },
       { name: "body", label: "النص", required: true },
+      { name: "accountSid", label: "معرّف حساب تويليو (اختياري)" },
     ],
     toProps: (v) => ({ from: v["from"], to: v["to"], body: v["body"] }),
   },
@@ -858,12 +860,14 @@ export const employeeActions: EmployeeActionDef[] = [
   },
 ];
 
+const allActions: EmployeeActionDef[] = [...employeeActions, ...extraEmployeeActions];
+
 export function actionsFor(employeeId: string): EmployeeActionDef[] {
-  return employeeActions.filter((a) => a.employeeId === employeeId || a.employeeId === "*");
+  return allActions.filter((a) => a.employeeId === employeeId || a.employeeId === "*");
 }
 
 export function getEmployeeAction(id: string): EmployeeActionDef | undefined {
-  return employeeActions.find((a) => a.id === id);
+  return allActions.find((a) => a.id === id);
 }
 
 async function requirePage(
@@ -918,7 +922,8 @@ export async function runEmployeeActionServer(
 
   // المسار المضمون: تنفيذ مباشر على واجهة المنصة عبر وكيل Pipedream.
   const { directActions } = await import("./direct-actions.server");
-  const direct = directActions[def.id];
+  const { extraDirectActions } = await import("./direct-actions-extra.server");
+  const direct = directActions[def.id] ?? extraDirectActions[def.id];
   if (direct) {
     const result = await direct({
       config,
