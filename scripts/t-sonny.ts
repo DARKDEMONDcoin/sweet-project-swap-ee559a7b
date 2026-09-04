@@ -29,5 +29,5 @@ await Promise.all(Array.from({ length: 4 }, async () => {
 }));
 console.log(JSON.stringify(r.map(x=>x.ok?`✅ ${x.title} · ${x.chars} حرف · ${x.secs}ث`:`❌ ${x.title} · ${(x as any).err}`), null, 1));
 console.log("نجاح:", r.filter(x=>x.ok).length, "/", r.length);
-const sample = await executeSkill(c, { workspaceId: ws!.id, employeeId:"sonny", skillId:"social-daily-ideas", values: fill(skills.find(s=>s.id==="social-daily-ideas")!), origin:"عيّنة" });
-console.log("\n--- عيّنة مخرجات ---\n", sample.output.slice(0,1500));
+const sample: any = null; const _unused = await Promise.resolve(); void sample; void _unused; const sample2 = await executeSkill(c, { workspaceId: ws!.id, employeeId:"sonny", skillId:"social-daily-ideas", values: fill(skills.find(s=>s.id==="social-daily-ideas")!), origin:"عيّنة" });
+console.log("\n--- عيّنة مخرجات ---\n", sample2.output.slice(0,900));
