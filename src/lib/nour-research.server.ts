@@ -166,11 +166,17 @@ export async function freeChat(
   const apiKey = keys.openrouter || keyHint;
 
   if (keys.lovable) {
+    // ضغط الطلبات المتوازية يرجع 429 مؤقتاً — نعيد المحاولة بتأخير متصاعد
+    // قبل الانتقال لمزوّد آخر، حتى لا يرى المستخدم فشلاً بلا سبب.
     for (const model of LOVABLE_MODELS) {
-      try {
-        return await callOpenAICompatible(LOVABLE, keys.lovable, model, messages, options);
-      } catch (error) {
-        lastError = (error as Error).message;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        try {
+          return await callOpenAICompatible(LOVABLE, keys.lovable, model, messages, options);
+        } catch (error) {
+          lastError = (error as Error).message;
+          if (!lastError.includes("429")) break;
+          await new Promise((r) => setTimeout(r, 1500 * 2 ** attempt + Math.random() * 800));
+        }
       }
     }
   }
