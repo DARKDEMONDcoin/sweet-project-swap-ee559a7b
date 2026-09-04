@@ -8,6 +8,11 @@ type Keys = { gemini: string; openrouter: string };
 let cache: { at: number; keys: Keys } | null = null;
 const TTL = 5 * 60 * 1000;
 
+/** إبطال الذاكرة المؤقتة بعد تحديث المفاتيح من الإعدادات. */
+export function resetProviderKeys(): void {
+  cache = null;
+}
+
 export async function providerKeys(): Promise<Keys> {
   if (cache && Date.now() - cache.at < TTL) return cache.keys;
 
