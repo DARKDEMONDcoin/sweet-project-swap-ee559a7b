@@ -75,6 +75,7 @@ function IntegrationsPage() {
   const [webflowOpen, setWebflowOpen] = useState(false);
   const [ghostOpen, setGhostOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingSync, setPendingSync] = useState(false);
 
   useEffect(() => {
     void checkPipedream({ data: undefined })
