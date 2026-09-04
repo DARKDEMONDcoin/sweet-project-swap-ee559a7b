@@ -136,6 +136,29 @@ function Onboarding() {
       } catch (error) {
         console.error("[onboarding] daily ideas automation failed:", error);
       }
+      // سِراج كذلك: 3 أفكار منشورات جاهزة كل صباح
+      try {
+        await createAutomation({
+          data: {
+            workspaceId: workspace.id,
+            employeeId: "sonny",
+            skillId: "social-daily-ideas",
+            label: "3 أفكار منشورات كل صباح",
+            values: {
+              business: industry || workspace.industry || name || workspace.name,
+              platform: "إنستغرام",
+              dialect: "خليجية (السعودية/الإمارات)",
+            },
+            cadence: "daily",
+            dayOfWeek: 1,
+            hour: 7,
+            autoPublish: false,
+            active: true,
+          },
+        });
+      } catch (error) {
+        console.error("[onboarding] sonny daily ideas automation failed:", error);
+      }
       void navigate({ to: "/app" });
     } finally {
       setSaving(false);

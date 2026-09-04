@@ -235,7 +235,7 @@ export async function executeSkill(
 
 
   const persona = personas[params.employeeId];
-  const skill = getSkill(params.skillId);
+  const skill = getSkill(params.skillId, params.employeeId);
   if (!persona || !skill || skill.employeeId !== params.employeeId)
     throw new Error("قدرة غير معروفة لهذا الموظف.");
 
