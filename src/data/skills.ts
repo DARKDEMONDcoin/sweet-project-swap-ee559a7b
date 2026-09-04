@@ -1095,6 +1095,10 @@ export function skillsByCategory(employeeId: string) {
   return [...groups.entries()];
 }
 
-export function getSkill(id: string) {
+export function getSkill(id: string, employeeId?: string) {
+  if (employeeId) {
+    const own = skills.find((s) => s.id === id && s.employeeId === employeeId);
+    if (own) return own;
+  }
   return skills.find((s) => s.id === id);
 }
