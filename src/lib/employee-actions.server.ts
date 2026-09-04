@@ -929,6 +929,19 @@ export async function runEmployeeActionServer(
     return { actionId: def.id, provider: def.provider, result };
   }
 
+  // المسار المضمون: تنفيذ مباشر على واجهة المنصة عبر وكيل Pipedream.
+  const { directActions } = await import("./direct-actions.server");
+  const direct = directActions[def.id];
+  if (direct) {
+    const result = await direct({
+      config,
+      workspaceId: params.workspaceId,
+      accountId: account.account_id,
+      values: params.values,
+    });
+    return { actionId: def.id, provider: def.provider, result };
+  }
+
   if (!action) throw new Error("هذا الإجراء غير مدعوم على هذه المنصة بعد.");
 
   const result = await runAction(config, {

@@ -247,7 +247,7 @@ export const pipedreamApps: PipedreamApp[] = [
   },
   {
     provider: "slack",
-    slug: "slack",
+    slug: "slack_v2",
     label: "سلاك",
     publishComponent: "slack-send-message",
     accountProp: "slack",

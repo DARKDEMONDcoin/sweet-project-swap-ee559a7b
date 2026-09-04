@@ -436,12 +436,6 @@ export const directActions: Record<string, (ctx: DirectContext) => Promise<unkno
       { method: "PUT", json: { comment: v(ctx, "comment") } },
     ),
 
-  /* تيليجرام */
-  "team-telegram-send": (ctx) =>
-    api(ctx, "https://api.telegram.org/bot/sendMessage", {
-      json: { chat_id: v(ctx, "chatId"), text: v(ctx, "text") },
-    }),
-
   /* سيو وقياس */
   "nour-gsc-performance": (ctx) => {
     const days = Math.max(1, Math.min(180, Number(v(ctx, "days") || "28") || 28));
