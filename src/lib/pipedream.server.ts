@@ -48,7 +48,7 @@ export async function pipedreamConfig(): Promise<PipedreamConfig | null> {
     clientId,
     clientSecret,
     projectId,
-    environment: found["PIPEDREAM_ENVIRONMENT"] === "production" ? "production" : "development",
+    environment: found["PIPEDREAM_ENVIRONMENT"]?.trim().toLowerCase() === "production" ? "production" : "development",
   };
   configCache = { at: Date.now(), value };
   return value;
