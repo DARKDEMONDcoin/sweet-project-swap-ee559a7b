@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CreditCard, Building2, Bell, User } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CreditCard, Building2, Bell, User, KeyRound } from "lucide-react";
 
 import { AppShell } from "@/components/app/AppShell";
 import {
@@ -10,6 +12,7 @@ import {
   useUpdateWorkspace,
   useWorkspace,
 } from "@/lib/data";
+import { getAiKeys, saveAiKeys, testAiKeys } from "@/lib/ai-keys.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/settings")({
@@ -26,6 +29,7 @@ export const Route = createFileRoute("/app/settings")({
 const tabs = [
   { id: "workspace", label: "مساحة العمل", icon: Building2 },
   { id: "account", label: "حسابك", icon: User },
+  { id: "ai", label: "مفاتيح الذكاء", icon: KeyRound },
   { id: "billing", label: "الاشتراك", icon: CreditCard },
   { id: "notifications", label: "التنبيهات", icon: Bell },
 ] as const;
