@@ -13,7 +13,7 @@ const fill = (s: (typeof skills)[number]) => Object.fromEntries(s.fields.map((f)
   if (f.type === "select" && f.options?.length) v = String(f.options[0]);
   else if (/عدد|count|كم/.test(label) && f.type !== "textarea") v = "3";
   else if (/رابط|url|link/i.test(label)) v = "https://atheer.example.com/leil-alula";
-  return [f.id, v];
+  return [f.name, v];
 }));
 const r = await Promise.all(skills.map(async (s) => {
   const t = Date.now();
