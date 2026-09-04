@@ -142,7 +142,7 @@ export const connectWordPress = createServerFn({ method: "POST" })
 export const disconnectProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ workspaceId: z.string().uuid(), provider: z.string().min(2).max(40) }).parse(input),
+    z.object({ workspaceId: z.string().uuid(), provider: z.string().min(1).max(40) }).parse(input),
   )
   .handler(async ({ data, context }) => {
     const admin = await assertOwner(context.supabase, data.workspaceId);
