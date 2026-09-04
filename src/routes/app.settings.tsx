@@ -172,6 +172,9 @@ function SettingsPage() {
             </form>
           ) : null}
 
+          {tab === "ai" ? <AiKeysPanel /> : null}
+
+
           {tab === "billing" ? (
             <div className="space-y-4">
               <h2 className="font-display text-xl font-black">الاشتراك</h2>
