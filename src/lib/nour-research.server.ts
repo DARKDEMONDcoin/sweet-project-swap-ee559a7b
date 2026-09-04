@@ -20,6 +20,10 @@ export type ResearchPlan = {
 
 const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
 const GEMINI = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+const LOVABLE = "https://ai.gateway.lovable.dev/v1/chat/completions";
+
+/** نماذج بوابة Lovable المدمجة (لا تحتاج مفتاحاً من المستخدم). */
+export const LOVABLE_MODELS = ["google/gemini-2.5-flash", "google/gemini-2.5-flash-lite"];
 
 /** نماذج Google AI Studio (المزوّد الأساسي) بالترتيب. */
 // flash-lite أولاً: يردّ في ~7 ثوانٍ بجودة قريبة، بينما 3.6-flash يتجاوز 50 ثانية
@@ -116,13 +120,14 @@ async function callModel(
 }
 
 /** نداء نموذج Gemini عبر واجهة Google المتوافقة مع OpenAI. */
-async function callGemini(
+async function callOpenAICompatible(
+  endpoint: string,
   apiKey: string,
   model: string,
   messages: { role: string; content: string }[],
   options: ChatOptions,
 ): Promise<string> {
-  const res = await fetch(GEMINI, {
+  const res = await fetch(endpoint, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -160,11 +165,27 @@ export async function freeChat(
   const keys = await providerKeys();
   const apiKey = keys.openrouter || keyHint;
 
+  if (keys.lovable) {
+    // ضغط الطلبات المتوازية يرجع 429 مؤقتاً — نعيد المحاولة بتأخير متصاعد
+    // قبل الانتقال لمزوّد آخر، حتى لا يرى المستخدم فشلاً بلا سبب.
+    for (const model of LOVABLE_MODELS) {
+      for (let attempt = 0; attempt < 4; attempt++) {
+        try {
+          return await callOpenAICompatible(LOVABLE, keys.lovable, model, messages, options);
+        } catch (error) {
+          lastError = (error as Error).message;
+          if (!lastError.includes("429")) break;
+          await new Promise((r) => setTimeout(r, 1500 * 2 ** attempt + Math.random() * 800));
+        }
+      }
+    }
+  }
+
   const geminiKey = keys.gemini;
   if (geminiKey) {
     for (const model of GEMINI_MODELS) {
       try {
-        return await callGemini(geminiKey, model, messages, options);
+        return await callOpenAICompatible(GEMINI, geminiKey, model, messages, options);
       } catch (error) {
         lastError = (error as Error).message;
       }
