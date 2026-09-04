@@ -77,7 +77,7 @@ const q = (lines: (string | false | undefined)[]) =>
 export const sonnySkills: Skill[] = [
   /* —————————— بحث واستراتيجية —————————— */
   {
-    id: "brand-voice",
+    id: "social-brand-voice",
     employeeId: "sonny",
     title: "استخراج صوت العلامة",
     summary: "يحلل حساباتك وموقعك ويستخرج دليل صوت وأسلوب بصري يلتزم به كل منشور.",
@@ -480,7 +480,7 @@ export const sonnySkills: Skill[] = [
 
   /* —————————— أفكار يومية وترند —————————— */
   {
-    id: "daily-ideas",
+    id: "social-daily-ideas",
     employeeId: "sonny",
     title: "٣ أفكار منشورات اليوم",
     summary: "ثلاث أفكار قابلة للنشر فوراً كل صباح، مرتبة باحتمال الانتشار.",
