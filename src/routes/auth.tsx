@@ -5,7 +5,6 @@ import { z } from "zod";
 import {
   ArrowLeft,
   Building2,
-  CheckCircle2,
   Eye,
   EyeOff,
   Loader2,
@@ -101,7 +100,6 @@ function AuthPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const [resetSent, setResetSent] = useState(false);
 
   const strength = useMemo(() => strengthOf(password), [password]);
@@ -210,40 +208,6 @@ function AuthPage() {
     } finally {
       setBusy(false);
     }
-  }
-
-  if (emailSent) {
-    return (
-      <PageShell>
-        <PageHero eyebrow="خطوة أخيرة" title="أكّد بريدك وابدأ فوراً" />
-        <section className="mx-auto max-w-xl px-5 py-16">
-          <Reveal>
-            <div className="rounded-3xl border border-border bg-card p-8 text-center shadow-card">
-              <CheckCircle2 className="mx-auto size-12 text-primary" />
-              <h2 className="mt-4 font-display text-2xl font-black">أرسلنا رسالة تأكيد</h2>
-              <p className="mt-3 leading-relaxed text-ink-soft">
-                افتح بريد <span className="font-bold">{email}</span> واضغط رابط التأكيد، وسيفتح لك
-                فريق الموظفين مباشرةً.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <button
-                  onClick={() => switchMode("signin")}
-                  className="rounded-full bg-foreground px-5 py-2.5 text-sm font-bold text-background"
-                >
-                  تسجيل الدخول
-                </button>
-                <Link
-                  to="/app"
-                  className="rounded-full border border-border px-5 py-2.5 text-sm font-bold"
-                >
-                  تجربة بدون تسجيل
-                </Link>
-              </div>
-            </div>
-          </Reveal>
-        </section>
-      </PageShell>
-    );
   }
 
   const isSignup = mode === "signup";
