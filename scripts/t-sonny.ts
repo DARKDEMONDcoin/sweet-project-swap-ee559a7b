@@ -15,11 +15,17 @@ const fill = (s: (typeof skills)[number]) => Object.fromEntries(s.fields.map((f)
   else if (/رابط|url|link/i.test(label)) v = "https://atheer.example.com/leil-alula";
   return [f.name, v];
 }));
-const r = await Promise.all(skills.map(async (s) => {
+const run = async (s: (typeof skills)[number]) => {
   const t = Date.now();
   try { const o = await executeSkill(c, { workspaceId: ws!.id, employeeId:"sonny", skillId: s.id, values: fill(s), origin:"اختبار شامل" });
     return { id: s.id, title: s.title, ok:true, chars:o.output.length, task:Boolean(o.taskId), secs:+((Date.now()-t)/1000).toFixed(1) };
   } catch(e){ return { id: s.id, title: s.title, ok:false, err: (e instanceof Error ? e.message : String(e)).slice(0,140), secs:+((Date.now()-t)/1000).toFixed(1) }; }
+};
+// ٤ متزامنة في كل مرة: حد الاستخدام المجاني يرفض ٢٦ طلباً في اللحظة نفسها
+const r: any[] = [];
+const queue = [...skills];
+await Promise.all(Array.from({ length: 4 }, async () => {
+  for (let s = queue.shift(); s; s = queue.shift()) r.push(await run(s));
 }));
 console.log(JSON.stringify(r.map(x=>x.ok?`✅ ${x.title} · ${x.chars} حرف · ${x.secs}ث`:`❌ ${x.title} · ${(x as any).err}`), null, 1));
 console.log("نجاح:", r.filter(x=>x.ok).length, "/", r.length);
