@@ -19,7 +19,7 @@ export type DirectContext = {
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 /** نداء مباشر لواجهة المنصة عبر الوكيل. */
-async function api<T = unknown>(
+export async function api<T = unknown>(
   ctx: DirectContext,
   url: string,
   init: {
@@ -50,19 +50,19 @@ async function api<T = unknown>(
   });
 }
 
-const v = (ctx: DirectContext, name: string): string => (ctx.values[name] ?? "").trim();
-const opt = (ctx: DirectContext, name: string): string | undefined => {
+export const v = (ctx: DirectContext, name: string): string => (ctx.values[name] ?? "").trim();
+export const opt = (ctx: DirectContext, name: string): string | undefined => {
   const value = v(ctx, name);
   return value ? value : undefined;
 };
-const list = (ctx: DirectContext, name: string): string[] =>
+export const list = (ctx: DirectContext, name: string): string[] =>
   v(ctx, name)
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 
 /** ترميز base64url لرسالة RFC822 (جيميل). */
-function base64Url(value: string): string {
+export function base64Url(value: string): string {
   const bytes = new TextEncoder().encode(value);
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
@@ -70,13 +70,13 @@ function base64Url(value: string): string {
 }
 
 /** ترميز عنوان/موضوع عربي في ترويسة البريد. */
-function mimeHeader(value: string): string {
+export function mimeHeader(value: string): string {
   // eslint-disable-next-line no-control-regex
   if (/^[\x00-\x7F]*$/.test(value)) return value;
   return `=?UTF-8?B?${base64Url(value).replace(/-/g, "+").replace(/_/g, "/")}?=`;
 }
 
-function rfc822(to: string, subject: string, body: string): string {
+export function rfc822(to: string, subject: string, body: string): string {
   return [
     `To: ${to}`,
     `Subject: ${mimeHeader(subject)}`,
@@ -90,7 +90,7 @@ function rfc822(to: string, subject: string, body: string): string {
 
 /* ————— مساعدات تحديد نطاق الحساب لبعض المنصات ————— */
 
-async function salesforceInstance(ctx: DirectContext): Promise<string> {
+export async function salesforceInstance(ctx: DirectContext): Promise<string> {
   const info = await api<{ urls?: { rest?: string } }>(
     ctx,
     "https://login.salesforce.com/services/oauth2/userinfo",
@@ -101,7 +101,7 @@ async function salesforceInstance(ctx: DirectContext): Promise<string> {
   return base;
 }
 
-async function mailchimpBase(ctx: DirectContext): Promise<string> {
+export async function mailchimpBase(ctx: DirectContext): Promise<string> {
   const meta = await api<{ api_endpoint?: string }>(
     ctx,
     "https://login.mailchimp.com/oauth2/metadata",
@@ -110,7 +110,7 @@ async function mailchimpBase(ctx: DirectContext): Promise<string> {
   return meta.api_endpoint.replace(/\/$/, "");
 }
 
-async function pipedriveBase(ctx: DirectContext): Promise<string> {
+export async function pipedriveBase(ctx: DirectContext): Promise<string> {
   const me = await api<{ data?: { company_domain?: string } }>(
     ctx,
     "https://api.pipedrive.com/v1/users/me",
@@ -119,7 +119,7 @@ async function pipedriveBase(ctx: DirectContext): Promise<string> {
   return domain ? `https://${domain}.pipedrive.com/api/v1` : "https://api.pipedrive.com/v1";
 }
 
-async function sheetTitle(ctx: DirectContext, sheetId: string, gid: string): Promise<string> {
+export async function sheetTitle(ctx: DirectContext, sheetId: string, gid: string): Promise<string> {
   const meta = await api<{
     sheets?: { properties?: { sheetId?: number; title?: string } }[];
   }>(ctx, `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(sheetId)}?fields=sheets.properties`);
@@ -132,7 +132,7 @@ async function sheetTitle(ctx: DirectContext, sheetId: string, gid: string): Pro
   return title;
 }
 
-async function driveUpload(
+export async function driveUpload(
   ctx: DirectContext,
   params: { name: string; content: string; parentId?: string; mimeType?: string },
 ): Promise<{ id?: string; name?: string; webViewLink?: string }> {
